@@ -38,3 +38,17 @@ Implementation root: `backend-arch-ref/` (the supplied specification and locked 
 - Sample forts are excluded from fort/skill counts, skills are case-insensitive, live latency excludes mock/cache replies, and HTML output is escaped.
 - `npm run verify:frontend` and all 20 unit tests pass; cache expiry and no-database zero counts are checked.
 - User authorized incremental GitHub commits/pushes without coauthors. The specified remote was empty; preserving the supplied frozen baseline before backend commits.
+
+## Phase 6 — hunt and fix
+
+- Chrome/Playwright completed mock Excel from warm-up through room 20/victory and offline Python through all rooms 1–20/victory. No page errors or unpkg requests; Google Fonts blocked. Desktop terminal and mobile title screenshots visually reviewed.
+- Fixed save changes lost during an in-flight request, stale memory resurrecting deleted saves, and missing backup events when storage is entirely blocked. Read-only memory polling is necessary because frozen Store.set returns before Storage.setItem when Store.ok=false. Bridge is 3,028 bytes minified; regression tests cover these cases.
+- Specification correction: with no DATABASE_URL, sync=false intentionally prevents save POSTs. Browser save tests enable only the injected sync flag in a test harness and exercise the real no-DB save endpoint; they do not claim a real Neon row. Save arrival within five seconds and erase `game:null` verified.
+- All 30 unit tests and frozen hashes pass. The sample validator exception and all ten starter findings are documented in FINDINGS. Cached Chrome measured font CSS twice and game scripts once over the network; cache headers remain as specified.
+
+## Phase 7 — handoff
+
+- Added .env.example and DEPLOYMENT.md with the Vercel schema, account-free mock launch, Neon/Gemini/YouTube setup, preview checks and demo-day checklist.
+- User explicitly took ownership of README; no README was created. DEPLOYMENT.md holds the operational handoff.
+- Frozen baseline and phases 1–5 were individually committed and pushed to main without coauthor trailers. Hunt fixes and deployment handoff follow as separate commits.
+- Vercel CLI/login/env credentials are absent. A Vercel integration was found but is not connected; it was offered for connection. No live deployment or account-dependent acceptance test is claimed.

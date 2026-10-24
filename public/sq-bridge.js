@@ -13,31 +13,34 @@
   } catch (e) {}
   try {
     if (cfg.sync) {
-      var timer, lastSent = '', busy = false;
+      var timer, lastSent = '', busy = false, removed = {};
       var read = function (k) {
+        var store = window.__sq && window.__sq.store, mem = store && store.mem;
+        if (removed[k] && !(store && !store.ok && mem && Object.prototype.hasOwnProperty.call(mem, k))) return null;
         var v = null; try { v = window.localStorage.getItem(k); } catch (e) {}
-        var mem = window.__sq && window.__sq.store && window.__sq.store.mem;
         return v === null && mem && Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : v;
       };
       var send = function (beacon) {
         try {
           clearTimeout(timer);
           var body = JSON.stringify({ profile: read(KP), game: read(KG) });
-          if (body === lastSent || busy) return;
+          if (body === lastSent) return;
           if (beacon && new Blob([body]).size < 60000 && navigator.sendBeacon && navigator.sendBeacon('/api/save', new Blob([body], { type: 'text/plain' }))) { lastSent = body; return; }
+          if (busy) return;
           busy = true;
-          fetch('/api/save', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body }).then(function (r) { if (r.ok) lastSent = body; }).catch(function () {}).then(function () { busy = false; });
+          fetch('/api/save', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body }).then(function (r) { if (r.ok) lastSent = body; }).catch(function () {}).then(function () { busy = false; if (JSON.stringify({ profile: read(KP), game: read(KG) }) !== body) send(false); });
         } catch (e) { busy = false; }
       };
       ['setItem', 'removeItem'].forEach(function (name) {
         var orig = Storage.prototype[name];
         Storage.prototype[name] = function (k) {
           var out; try { out = orig.apply(this, arguments); } catch (e) {}
-          try { if (this === window.localStorage && (k === KP || k === KG)) { clearTimeout(timer); timer = setTimeout(function () { send(false); }, 2000); } } catch (e) {}
+          try { if (this === window.localStorage && (k === KP || k === KG)) { removed[k] = name === 'removeItem'; clearTimeout(timer); timer = setTimeout(function () { send(false); }, 2000); } } catch (e) {}
           return out;
         };
       });
       document.addEventListener('visibilitychange', function () { if (document.hidden) send(true); });
+      setInterval(function () { try { if (window.__sq && !window.__sq.store.ok) send(false); } catch (e) {} }, 2000);
     }
   } catch (e) {}
   try {
