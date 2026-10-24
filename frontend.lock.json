@@ -1,0 +1,10 @@
+{
+  "note": "These 5 files are frozen. scripts/verify-frontend.mjs must fail if any hash changes.",
+  "files": {
+    "public/Square One.dc.html": "3d5c99c77921a747828c6b7a09c42577c14faf8f95fcd7377c0334975dff87f1",
+    "public/support.js": "8fe7df74405f3c55f49b7249c74ea1397e65d07dea2b1bd3b4a489bec2e28cbe",
+    "public/sq-data.js": "45cbde26616e52912ec5beb9e3b91bf5c448b6cc2a0617f8641a4854b40c6a4b",
+    "public/sq-engine.js": "479b8856f82fa7612bb6393c80869e62e49d6205ccadd8aa7fcaf8b5fa5da957",
+    "public/sq-game.js": "19b22528b23ed83821b1191653d767fc30bd8bf13b2958c29fbb29a2e113e853"
+  }
+}

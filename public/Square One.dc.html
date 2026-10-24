@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Noto+Sans+Devanagari:wght@400;600;700&amp;display=swap">
+<style>
+html,body{margin:0;padding:0;background:#07061a;height:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+*{box-sizing:border-box}
+a{color:#ffb22e}a:hover{color:#ffd88a}
+button{font:inherit;color:inherit}
+input::placeholder{color:#8a83ad}
+</style>
+<script src="sq-data.js"></script>
+<script src="sq-engine.js"></script>
+<script src="sq-game.js"></script>
+</helmet>
+<div style="position:fixed;inset:0;background:#07061a;color:#f5ecd9;font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',system-ui,sans-serif;overflow:hidden;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none">
+
+  <div style="position:relative;flex:1 1 auto;min-height:0;overflow:hidden;background:#000">
+    <canvas ref="{{ canvasRef }}" style="position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;display:block"></canvas>
+    <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px)"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 180px rgba(0,0,0,0.7)"></div>
+
+    <sc-if value="{{ bannerOn }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;top:40%;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;text-align:center;padding:0 16px">
+        <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:clamp(9px,1.2vw,13px);color:#ffb22e;text-shadow:2px 2px 0 #000">{{ banner.top }}</div>
+        <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:clamp(13px,2.4vw,28px);line-height:1.5;color:#f5ecd9;text-shadow:3px 3px 0 #000;text-wrap:balance">{{ banner.main }}</div>
+      </div>
+    </sc-if>
+
+    <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;max-width:60%">
+      <sc-for list="{{ toastList }}" as="t" hint-placeholder-count="0">
+        <div style="padding:8px 11px;background:{{ t.bg }};border:2px solid {{ t.border }};font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;line-height:1.6;color:#f5ecd9;box-shadow:3px 3px 0 #000;text-align:right">{{ t.text }}</div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ actionOn }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ doAction }}" style="position:absolute;left:50%;bottom:46%;transform:translateX(-50%);min-height:46px;padding:10px 16px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer;white-space:nowrap" style-hover="background:#ffd88a">E · {{ action.label }}</button>
+    </sc-if>
+
+    <sc-if value="{{ buildPanelOn }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:12px;bottom:12px;width:min(270px,48%);padding:10px 12px;background:rgba(9,7,26,0.9);border:2px solid #39335f;box-shadow:3px 3px 0 #000;display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;line-height:1.7;color:#ffb22e">{{ s.building }} · {{ build.skill }}</div>
+        <div style="height:6px;background:#241f52"><div style="height:100%;width:{{ buildPctW }};background:#ffb22e;transition:width .3s"></div></div>
+        <div style="display:flex;gap:8px;align-items:center;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;line-height:1.6"><span style="width:8px;height:8px;flex:none;background:{{ buildDot }}"></span><span>{{ buildStep }}</span></div>
+        <sc-if value="{{ build.slow }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ sample }}" style="min-height:40px;padding:6px 10px;background:#1a1640;border:2px solid #ffb22e;color:#f5ecd9;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:7px;line-height:1.6;cursor:pointer;text-align:left" style-hover="background:#221d52">{{ s.sample }}</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <div style="position:absolute;left:0;right:0;top:0;padding:10px 12px;display:flex;flex-direction:column;gap:8px;pointer-events:none;opacity:{{ chromeOp }}">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;justify-content:space-between">
+        <div style="flex:1 1 320px;max-width:820px;min-height:48px;display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(18,15,46,0.9);border:2px solid #39335f;box-shadow:4px 4px 0 #000">
+          <div style="width:10px;height:10px;background:#ffb22e;flex:none;box-shadow:0 0 8px #ffb22e"></div>
+          <div style="min-width:0;display:flex;flex-direction:column;gap:5px">
+            <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;line-height:1.6;color:#ffb22e;text-wrap:pretty">{{ obj.main }}</div>
+            <div style="font-size:16px;line-height:1.3;color:#f5ecd9;font-weight:700">{{ obj.sub }}</div>
+          </div>
+        </div>
+        <sc-if value="{{ ctlOn }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:0 0 auto;margin-left:auto;display:flex;gap:6px;pointer-events:auto;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px">
+            <sc-if value="{{ hudOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openMap }}" title="M" style="min-width:46px;min-height:46px;padding:0 10px;background:rgba(26,22,64,0.92);border:2px solid #39335f;box-shadow:3px 3px 0 #000;cursor:pointer" style-hover="border-color:#ffb22e">{{ s.map }}</button></sc-if>
+            <button onClick="{{ toggleGlide }}" title="G" style="min-width:46px;min-height:46px;padding:0 10px;background:{{ glideBg }};color:{{ glideFg }};border:2px solid #39335f;box-shadow:3px 3px 0 #000;cursor:pointer" style-hover="border-color:#ffb22e">{{ s.gp }}</button>
+            <button onClick="{{ toggleMute }}" title="{{ muteTitle }}" style="min-width:46px;min-height:46px;padding:0 10px;background:rgba(26,22,64,0.92);border:2px solid #39335f;box-shadow:3px 3px 0 #000;cursor:pointer;font-size:12px" style-hover="border-color:#ffb22e">{{ muteLabel }}</button>
+            <sc-if value="{{ canFs }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toggleFs }}" title="F" style="min-width:46px;min-height:46px;padding:0 10px;background:rgba(26,22,64,0.92);border:2px solid #39335f;box-shadow:3px 3px 0 #000;cursor:pointer;font-size:12px" style-hover="border-color:#ffb22e">{{ fsLabel }}</button></sc-if>
+            <button onClick="{{ pause }}" title="Esc" style="min-width:46px;min-height:46px;padding:0 12px;background:rgba(26,22,64,0.92);border:2px solid #39335f;box-shadow:3px 3px 0 #000;cursor:pointer;font-size:10px" style-hover="border-color:#ffb22e">II</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ fightOn }}" hint-placeholder-val="{{ false }}">
+        <div style="width:100%;max-width:980px;max-height:{{ fightMaxH }};overflow:auto;pointer-events:auto;padding:12px 14px;background:rgba(9,7,26,0.92);border:2px solid {{ fightBorder }};box-shadow:4px 4px 0 #000;display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap">
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;padding:5px 7px;background:{{ fightBorder }};color:#120f2e">{{ fight.kindLabel }}</span>
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;color:#f5ecd9;line-height:1.6">{{ fight.name }}</span>
+            </div>
+            <sc-if value="{{ fight.multi }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:4px">
+                <sc-for list="{{ fight.pips }}" as="p" hint-placeholder-count="3"><div style="width:12px;height:12px;border:2px solid #ffc23d;background:{{ p.bg }}"></div></sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div style="font-size:clamp(16px,1.9vw,23px);line-height:1.35;font-weight:700;text-wrap:pretty"><sc-for list="{{ fight.q }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;background:#241f52;color:#ffd88a;padding:1px 5px;font-size:0.92em">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></div>
+          <sc-if value="{{ fight.hasFix }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:8px;align-items:baseline;padding:8px 10px;background:#3a1020;border:2px solid #ff5a4f">
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#ff8a80;flex:none">{{ s.fix }}</span>
+              <span style="font-size:16px;line-height:1.4"><sc-for list="{{ fight.fix }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;background:#5a1a2e;color:#ffd88a;padding:1px 4px">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ bottomOn }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:7px 10px 9px;background:#0b0920;border-top:2px solid #39335f">
+      <div style="display:grid;grid-template-columns:{{ wCols }};gap:6px">
+        <sc-if value="{{ fightOn }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ fight.options }}" as="o" hint-placeholder-count="4">
+            <button onClick="{{ o.fire }}" style="min-height:54px;display:flex;align-items:center;gap:10px;padding:7px 10px;text-align:left;background:#120f2e;border:2px solid {{ o.hex }};box-shadow:3px 3px 0 #000;cursor:{{ o.cursor }};opacity:{{ o.op }};text-decoration:{{ o.strike }}" style-hover="background:#1e1950" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 #000">
+              <span style="flex:none;width:30px;height:30px;display:grid;place-items:center;background:{{ o.hex }};color:#120f2e;font-family:'Press Start 2P',monospace;font-size:11px">{{ o.key }}</span>
+              <span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:7px;color:{{ o.hex }}">{{ o.weapon }}</span>
+                <span style="font-size:16px;line-height:1.25;font-weight:700;overflow-wrap:anywhere"><sc-for list="{{ o.label }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;color:#ffd88a">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+              </span>
+            </button>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ noFight }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ weapons }}" as="w" hint-placeholder-count="4">
+            <div style="min-height:54px;display:flex;align-items:center;gap:10px;padding:7px 10px;background:#0d0b24;border:2px solid #2a2550">
+              <span style="flex:none;width:30px;height:30px;display:grid;place-items:center;border:2px solid {{ w.hex }};color:{{ w.hex }};font-family:'Press Start 2P',monospace;font-size:11px">{{ w.key }}</span>
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#8a83ad">{{ w.name }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hudOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px">
+          <div style="flex:1 1 170px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:7px 10px;background:#120f2e;border:2px solid #39335f">
+            <div style="display:flex;justify-content:space-between;gap:6px"><span style="color:#b9b0d6">{{ s.health }}</span><span style="color:{{ healthColor }}">{{ hud.health }}</span></div>
+            <div style="height:8px;background:#2a1020;border:1px solid #000"><div style="height:100%;width:{{ hud.healthW }};background:{{ healthColor }};transition:width .3s"></div></div>
+          </div>
+          <div style="flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:7px 10px;background:#120f2e;border:2px solid #39335f">
+            <span style="color:#b9b0d6">{{ s.armour }}</span><span style="color:#4fa3ff">{{ hud.armourLabel }}</span>
+          </div>
+          <div style="flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:7px 10px;background:#120f2e;border:2px solid #39335f">
+            <span style="color:#b9b0d6">{{ s.keys }}</span>
+            <div style="display:flex;gap:4px"><sc-for list="{{ hud.keys }}" as="k" hint-placeholder-count="5"><div style="width:14px;height:10px;background:{{ k.hex }};opacity:{{ k.op }};border:1px solid #000"></div></sc-for></div>
+          </div>
+          <div style="flex:1 1 130px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:7px 10px;background:#120f2e;border:2px solid #39335f">
+            <div style="display:flex;justify-content:space-between;gap:6px"><span style="color:#b9b0d6">{{ s.score }}</span><span style="color:#ff6bd5;opacity:{{ comboOp }}">{{ hud.comboLabel }}</span></div>
+            <span style="color:#ffc23d;font-size:11px">{{ hud.score }}</span>
+          </div>
+          <div style="flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:7px 10px;background:#120f2e;border:2px solid #39335f">
+            <span style="color:#b9b0d6">{{ hud.floorLabel }}</span><span style="color:#57d36a">{{ hud.floorPct }} · {{ hud.roomLabel }}</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isBoot }}" hint-placeholder-val="{{ true }}">
+    <div onClick="{{ enter }}" style="position:absolute;inset:0;z-index:50;background:#07061a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:24px;cursor:{{ bootCursor }}">
+      <div style="font-family:'Press Start 2P',monospace;font-size:clamp(26px,6vw,56px);color:#ffb22e;text-shadow:4px 4px 0 #7a2a3c, 8px 8px 0 #000;letter-spacing:2px;text-align:center;line-height:1.3">SQUARE ONE</div>
+      <div style="width:min(420px,80vw);display:flex;flex-direction:column;gap:10px">
+        <div style="height:18px;border:2px solid #39335f;background:#0d0b24;padding:2px"><div style="height:100%;width:{{ bootPctW }};background:repeating-linear-gradient(90deg,#ffb22e 0 10px,#e0901a 10px 12px);transition:width .25s"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;color:#b9b0d6"><span>{{ boot.label }}</span><span>{{ bootPctLabel }}</span></div>
+      </div>
+      <sc-if value="{{ boot.ready }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:11px;color:#f5ecd9;padding:12px 16px;border:2px solid #ffb22e;background:#120f2e;text-align:center;line-height:1.6">{{ s.enterKey }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isTitle }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40;background:rgba(7,6,26,0.78);overflow:auto;display:flex;justify-content:center;padding:24px 16px">
+      <div style="width:min(640px,100%);margin:auto 0;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center">
+          <div style="font-family:'Press Start 2P',monospace;font-size:clamp(28px,7vw,54px);color:#ffb22e;text-shadow:4px 4px 0 #7a2a3c, 8px 8px 0 #000;line-height:1.25">SQUARE ONE</div>
+          <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:clamp(9px,1.4vw,12px);line-height:1.9;color:#f5ecd9;text-shadow:2px 2px 0 #000;text-wrap:balance">{{ s.tagline }}</div>
+        </div>
+        <div style="padding:18px;background:#120f2e;border:2px solid #39335f;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:14px">
+          <label style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:11px;color:#ffb22e;line-height:1.6">{{ s.ask }}</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input value="{{ skill }}" onChange="{{ onSkill }}" onKeyDown="{{ onSkillKey }}" maxlength="60" placeholder="{{ s.placeholder }}" style="flex:1 1 240px;min-width:0;min-height:50px;padding:10px 12px;background:#07061a;border:2px solid #39335f;color:#f5ecd9;font-size:11px;line-height:1.6;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;outline:none" style-focus="border-color:#ffb22e">
+            <button onClick="{{ buildFort }}" style="flex:0 0 auto;min-height:50px;padding:0 18px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer" style-hover="background:#ffd88a" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #000">{{ s.build }}</button>
+          </div>
+          <sc-if value="{{ titleErr }}" hint-placeholder-val="{{ false }}"><div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;line-height:1.7;color:#ff8a80">{{ title.error }}</div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#b9b0d6">{{ s.orPick }}</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px">
+              <sc-for list="{{ skillChips }}" as="k" hint-placeholder-count="6">
+                <button onClick="{{ k.pick }}" style="min-height:48px;padding:10px 12px;background:#1a1640;border:2px solid #39335f;box-shadow:3px 3px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;line-height:1.6;color:#f5ecd9;text-shadow:2px 2px 0 #000;cursor:pointer;text-align:left" style-hover="border-color:#ffb22e;background:#221d52;color:#ffb22e" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 #000">{{ k.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#b9b0d6">{{ s.language }}</span>
+            <div style="display:flex;border:2px solid #39335f">
+              <sc-for list="{{ langList }}" as="l" hint-placeholder-count="3">
+                <button onClick="{{ l.pick }}" style="min-height:42px;padding:0 14px;background:{{ l.bg }};color:{{ l.fg }};border:none;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;cursor:pointer">{{ l.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-if value="{{ title.hasSave }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cont }}" style="min-height:52px;padding:10px 16px;background:#1d4a2c;border:2px solid #57d36a;box-shadow:4px 4px 0 #000;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;text-align:left" style-hover="background:#256238">
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px">{{ s.cont }}</span><span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;line-height:1.7;text-align:right">{{ title.saveLabel }}</span>
+            </button>
+          </sc-if>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onClick="{{ sample }}" style="flex:1 1 240px;min-height:48px;padding:8px 12px;background:#120f2e;border:2px solid #39335f;box-shadow:3px 3px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;line-height:1.6;cursor:pointer" style-hover="border-color:#ffb22e;color:#ffb22e">{{ s.sample }}</button>
+            <button onClick="{{ demo }}" style="flex:0 1 auto;min-height:48px;padding:8px 12px;background:#120f2e;border:2px dashed #39335f;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;line-height:1.6;color:#b9b0d6;cursor:pointer" style-hover="border-color:#ffb22e;color:#f5ecd9">{{ s.demo14 }}</button>
+          </div>
+          <sc-if value="{{ aiOffNote }}" hint-placeholder-val="{{ false }}"><div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;line-height:1.8;color:#b9b0d6">{{ s.aiOff }}</div></sc-if>
+          <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:7px;line-height:2;color:#8a83ad;text-align:center;padding-top:4px">{{ s.controls }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ buildFailed }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:45;background:rgba(7,6,26,0.86);display:grid;place-items:center;padding:16px">
+      <div style="width:min(460px,100%);padding:22px;background:#120f2e;border:2px solid #ff5a4f;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:16px;text-align:center">
+        <div style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:12px;line-height:1.6;color:#ff8a80">{{ build.err }}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button onClick="{{ retryBuild }}" style="min-height:46px;padding:0 16px;background:#ffb22e;color:#1a1030;border:2px solid #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;cursor:pointer">{{ s.retry }}</button>
+          <button onClick="{{ sample }}" style="min-height:46px;padding:0 16px;background:#1a1640;border:2px solid #39335f;font-size:15px;font-weight:700;cursor:pointer">{{ s.sample }}</button>
+          <button onClick="{{ backTitle }}" style="min-height:46px;padding:0 16px;background:#1a1640;border:2px solid #39335f;font-size:15px;font-weight:700;cursor:pointer">{{ s.back }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovTerm }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:rgba(2,8,8,0.72);display:flex;justify-content:center;align-items:center;padding:12px">
+      <div style="width:min(760px,100%);max-height:100%;overflow:auto;background:#04110f;border:3px solid #6ff2c8;box-shadow:0 0 0 3px #04110f, 0 0 32px rgba(111,242,200,0.35), 8px 8px 0 #000;display:flex;flex-direction:column;font-family:'IBM Plex Mono','Noto Sans Devanagari',monospace;color:#d8fff0;position:relative">
+        <div style="position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;background:#0a2a24;border-bottom:2px solid #6ff2c8">
+          <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;color:#6ff2c8">&gt; {{ s.terminal }} · {{ term.kicker }}</span>
+          <sc-if value="{{ termReady }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#9be8cf">{{ term.mins }}</span></sc-if>
+        </div>
+        <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',sans-serif;font-size:clamp(22px,3.4vw,30px);font-weight:700;color:#f5ecd9;line-height:1.2">{{ term.title }}</div>
+          <sc-if value="{{ term.review }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 14px;background:#2a0f2e;border:2px solid #b57bff;display:flex;flex-direction:column;gap:6px;font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',sans-serif">
+              <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#d4b0ff">{{ s.reviewFix }}</span>
+              <span style="font-size:16px;color:#e6d8ff"><sc-for list="{{ term.reviewQ }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;color:#ffd88a">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+              <span style="font-size:17px;font-weight:700;color:#fff"><sc-for list="{{ term.reviewFix }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;color:#ffd88a">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#6ff2c8">{{ s.why }}</span>
+            <span style="font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',sans-serif;font-size:18px;line-height:1.45;color:#d8fff0;text-wrap:pretty">{{ term.why }}</span>
+          </div>
+          <sc-if value="{{ term.loading }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:16px;color:#6ff2c8">&gt; {{ s.booting }}<span style="opacity:{{ blinkOp }}">█</span></div>
+          </sc-if>
+          <sc-if value="{{ term.error }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="font-size:16px;color:#ff8a80">&gt; {{ s.termErr }}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button onClick="{{ termRetry }}" style="min-height:44px;padding:0 14px;background:#0a2a24;border:2px solid #6ff2c8;color:#6ff2c8;font-size:15px;cursor:pointer">{{ s.retry }}</button>
+                <button onClick="{{ termBasic }}" style="min-height:44px;padding:0 14px;background:#6ff2c8;border:2px solid #000;color:#04110f;font-size:15px;font-weight:600;cursor:pointer">{{ s.useBasic }}</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ termReady }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <span style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#6ff2c8">{{ s.doNow }}</span>
+                <sc-for list="{{ term.steps }}" as="st" hint-placeholder-count="4">
+                  <div style="display:flex;gap:12px;align-items:baseline">
+                    <span style="flex:none;width:28px;height:28px;display:grid;place-items:center;background:#0a2a24;border:2px solid #6ff2c8;color:#6ff2c8;font-family:'Press Start 2P',monospace;font-size:9px">{{ st.n }}</span>
+                    <span style="font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',sans-serif;font-size:18px;line-height:1.45;color:#f5ecd9"><sc-for list="{{ st.segs }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;background:#0f3a32;color:#ffd88a;padding:1px 6px">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#6ff2c8">{{ s.watch }}</span>
+                <sc-if value="{{ term.video.hasEmbed }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border:2px solid #0f3a32"><iframe src="{{ term.video.embed }}" title="{{ term.video.ytTitle }}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>
+                    <span style="font-size:13px;color:#9be8cf">{{ term.video.ytTitle }} — {{ term.video.ytMeta }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ term.video.finding }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:#9be8cf">&gt; {{ s.findVideo }}</span></sc-if>
+                <a href="{{ term.video.searchUrl }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:10px 14px;background:#0a2a24;border:2px solid #0f3a32;color:#d8fff0;text-decoration:none" style-hover="border-color:#6ff2c8">
+                  <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="flex:none;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid #ff5a4f"></span><span style="font-size:15px;overflow-wrap:anywhere">{{ term.video.label }}</span></span>
+                  <span style="flex:none;font-size:13px;color:#6ff2c8">{{ s.openYT }} ↗</span>
+                </a>
+              </div>
+              <div style="padding:12px 14px;background:#0a2a24;border:2px dashed #6ff2c8;display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#6ff2c8">{{ s.doneWhen }}</span>
+                <span style="font-family:'Atkinson Hyperlegible','Noto Sans Devanagari',sans-serif;font-size:18px;font-weight:700;line-height:1.4;color:#f5ecd9"><sc-for list="{{ term.doneWhen }}" as="seg" hint-placeholder-count="1"><sc-if value="{{ seg.code }}"><code style="font-family:'IBM Plex Mono',monospace;color:#ffd88a">{{ seg.text }}</code></sc-if><sc-if value="{{ seg.plain }}"><span>{{ seg.text }}</span></sc-if></sc-for></span>
+              </div>
+              <button onClick="{{ closeTerm }}" style="min-height:54px;padding:0 18px;background:#6ff2c8;color:#04110f;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer" style-hover="background:#a8ffe2" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #000">{{ s.closeDone }}</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovMap }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMap }}" style="position:absolute;inset:0;z-index:30;background:rgba(7,6,26,0.9);overflow:auto;display:flex;justify-content:center;padding:16px">
+      <div onClick="{{ stop }}" style="width:min(900px,100%);margin:auto 0;padding:18px;background:#0d0b24;border:2px solid #39335f;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:13px;color:#ffb22e">{{ map.fort }}</span><span style="font-size:15px;color:#b9b0d6">{{ map.skill }} · {{ map.progress }}</span></div>
+          <button onClick="{{ closeMap }}" style="min-height:44px;padding:0 14px;background:#1a1640;border:2px solid #39335f;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;cursor:pointer">{{ s.close }} · M</button>
+        </div>
+        <sc-for list="{{ map.floors }}" as="fl" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#b9b0d6;line-height:1.6">{{ fl.name }}</span>
+            <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px">
+              <sc-for list="{{ fl.rooms }}" as="r" hint-placeholder-count="5">
+                <div style="min-height:86px;padding:7px;background:{{ r.bg }};color:{{ r.fg }};border:2px solid {{ r.border }};display:flex;flex-direction:column;gap:4px;min-width:0">
+                  <div style="display:flex;justify-content:space-between;gap:4px;font-family:'Press Start 2P',monospace;font-size:9px"><span>{{ r.n }}</span><span style="width:8px;height:8px;background:#1a1030;border:2px solid #fff;opacity:{{ r.dot }}"></span></div>
+                  <span style="font-size:12px;line-height:1.25;font-weight:700;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical">{{ r.title }}</span>
+                  <span style="margin-top:auto;font-size:11px;opacity:0.85">{{ r.state }}</span>
+                  <sc-if value="{{ r.hasTags }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:7px;line-height:1.6">{{ r.tags }}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovStats }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ statsNext }}" style="position:absolute;inset:0;z-index:30;background:rgba(7,6,26,0.82);display:flex;align-items:center;justify-content:center;padding:16px;cursor:pointer">
+      <div style="width:min(560px,100%);padding:22px;background:#0d0b24;border:2px solid #ffb22e;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:8px;text-align:center"><span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:clamp(13px,2.6vw,18px);color:#ffb22e;line-height:1.5">{{ stats.title }}</span><span style="font-size:15px;color:#b9b0d6">{{ stats.floorName }}</span></div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ stats.lines }}" as="l" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 4px;border-bottom:2px dotted #39335f;opacity:{{ l.op }}"><span style="font-size:16px">{{ l.label }}</span><span style="font-family:'Press Start 2P',monospace;font-size:13px;color:#f5ecd9">{{ l.value }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span style="font-size:16px">{{ s.sRank }}</span>
+          <span style="font-family:'Press Start 2P',monospace;font-size:48px;color:{{ rankColor }};text-shadow:4px 4px 0 #000">{{ stats.rank }}</span>
+        </div>
+        <sc-if value="{{ stats.hasBadges }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:#b9b0d6">{{ s.sBadges }}</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ stats.badges }}" as="b" hint-placeholder-count="1"><span style="padding:7px 10px;background:#3a2a08;border:2px solid #ffc23d;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#ffc23d">★ {{ b.label }}</span></sc-for></div></div>
+        </sc-if>
+        <button onClick="{{ statsNext }}" style="min-height:50px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer">{{ stats.cta }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovFell }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:rgba(40,4,12,0.8);display:grid;place-items:center;padding:16px">
+      <div style="width:min(440px,100%);padding:24px;background:#120f2e;border:2px solid #ff5a4f;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:14px;text-align:center">
+        <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:18px;color:#ff5a4f;line-height:1.5">{{ s.fell }}</span>
+        <span style="font-size:17px">{{ s.fellSub }}</span>
+        <button onClick="{{ restart }}" style="min-height:50px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer">{{ s.restart }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovSecret }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:rgba(7,6,26,0.7);display:grid;place-items:center;padding:16px">
+      <div style="width:min(460px,100%);padding:22px;background:#120f2e;border:2px solid #b57bff;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:16px;text-align:center">
+        <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:11px;color:#d4b0ff">{{ s.secretQ }}</span>
+        <span style="font-size:18px;line-height:1.4">{{ secretText }}</span>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <sc-if value="{{ ovSecretOffer }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+              <button onClick="{{ secretYes }}" style="min-height:48px;padding:0 18px;background:#b57bff;color:#120f2e;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer">{{ s.tryIt }}</button>
+              <button onClick="{{ secretNo }}" style="min-height:48px;padding:0 18px;background:#1a1640;border:2px solid #39335f;font-size:16px;font-weight:700;cursor:pointer">{{ s.notNow }}</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ovPause }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:35;background:rgba(7,6,26,0.88);overflow:auto;display:flex;justify-content:center;padding:16px">
+      <div style="width:min(520px,100%);margin:auto 0;padding:22px;background:#0d0b24;border:2px solid #39335f;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;gap:14px">
+        <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:18px;color:#ffb22e;text-align:center">{{ s.pause }}</span>
+        <button onClick="{{ pause }}" style="min-height:52px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer">{{ s.resume }}</button>
+        <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;color:#b9b0d6;padding-top:6px">{{ s.settings }}</span>
+        <sc-for list="{{ toggles }}" as="tg" hint-placeholder-count="3">
+          <button onClick="{{ tg.flip }}" style="min-height:48px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 14px;background:#120f2e;border:2px solid #39335f;font-size:16px;font-weight:700;cursor:pointer;text-align:left" style-hover="border-color:#ffb22e"><span>{{ tg.label }}</span><span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:9px;padding:5px 8px;background:{{ tg.bg }};color:{{ tg.fg }}">{{ tg.state }}</span></button>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:15px;color:#b9b0d6">{{ s.language }}</span>
+          <div style="display:flex;border:2px solid #39335f"><sc-for list="{{ langList }}" as="l" hint-placeholder-count="3"><button onClick="{{ l.pick }}" style="min-height:40px;padding:0 12px;background:{{ l.bg }};color:{{ l.fg }};border:none;font-size:15px;font-weight:700;cursor:pointer">{{ l.label }}</button></sc-for></div>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:#b9b0d6">{{ s.ytKey }}</span><input value="{{ ytKey }}" onChange="{{ onYt }}" placeholder="AIza…" spellcheck="false" style="min-height:44px;padding:8px 10px;background:#07061a;border:2px solid #39335f;color:#f5ecd9;font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none" style-focus="border-color:#ffb22e"></label>
+        <span style="font-size:13px;color:#8a83ad">{{ s.controls }}</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onClick="{{ quit }}" style="flex:1 1 160px;min-height:46px;background:#1a1640;border:2px solid #39335f;font-size:15px;font-weight:700;cursor:pointer" style-hover="border-color:#ffb22e">{{ s.quit }}</button>
+          <button onClick="{{ erase }}" style="flex:1 1 160px;min-height:46px;background:{{ eraseBg }};border:2px solid #ff5a4f;color:#ffb0a8;font-size:15px;font-weight:700;cursor:pointer">{{ eraseLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isVictory }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40;background:rgba(7,6,26,0.8);overflow:auto;display:flex;justify-content:center;padding:20px">
+      <div style="width:min(560px,100%);margin:auto 0;display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:clamp(20px,5vw,38px);color:#ffc23d;text-shadow:4px 4px 0 #7a2a3c, 8px 8px 0 #000;line-height:1.4">{{ s.victory }}</span>
+        <span style="font-size:19px;text-wrap:balance">{{ victory.sub }}</span>
+        <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="padding:14px;background:#120f2e;border:2px solid #39335f;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:#b9b0d6">{{ s.totalScore }}</span><span style="font-family:'Press Start 2P',monospace;font-size:16px;color:#ffc23d">{{ victory.score }}</span></div>
+          <div style="padding:14px;background:#120f2e;border:2px solid #39335f;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:#b9b0d6">{{ s.totalTime }}</span><span style="font-family:'Press Start 2P',monospace;font-size:16px">{{ victory.time }}</span></div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"><sc-for list="{{ victory.badges }}" as="b" hint-placeholder-count="3"><span style="padding:7px 10px;background:#3a2a08;border:2px solid #ffc23d;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:8px;color:#ffc23d">★ {{ b.label }}</span></sc-for></div>
+        <span style="font-size:17px;color:#b9b0d6">{{ s.tagline }}</span>
+        <button onClick="{{ newFort }}" style="min-height:52px;padding:0 20px;background:#ffb22e;color:#1a1030;border:2px solid #000;box-shadow:4px 4px 0 #000;font-family:'Press Start 2P','Noto Sans Devanagari',monospace;font-size:10px;cursor:pointer">{{ s.newFort }}</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { ui: null, skill: '', blink: true, vw: window.innerWidth, vh: window.innerHeight };
+  _onResize = () => { this.setState({ vw: window.innerWidth, vh: window.innerHeight }); if (this._fit) this._fit(); };
+  canvasRef = React.createRef();
+  componentDidMount() {
+    const start = () => {
+      if (this.game) return;
+      const SQ = window.SQ;
+      if (!SQ || !SQ._loaded || !SQ._loaded.game || !SQ._loaded.engine || !SQ._loaded.data || !this.canvasRef.current) { this._st = setTimeout(start, 30); return; }
+      this.game = new SQ.Game(this.canvasRef.current, (ui) => this.setState({ ui }));
+      window.__sq = this.game;
+      const cv = this.canvasRef.current, fit = () => { const r = cv.getBoundingClientRect(); this.game && this.game.resize(r.width, r.height); };
+      fit();
+      if (window.ResizeObserver) { this._ro = new ResizeObserver(fit); this._ro.observe(cv); }
+      this._fit = fit;
+      this.game.boot();
+    };
+    start();
+    window.addEventListener('resize', this._onResize);
+    this._blink = setInterval(() => { if (this.state.ui && this.state.ui.overlay === 'terminal') this.setState(s => ({ blink: !s.blink })); }, 500);
+  }
+  componentWillUnmount() { if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); clearTimeout(this._st); clearInterval(this._blink); }
+  renderVals() {
+    const ui = this.state.ui || { screen: 'boot', boot: { pct: 0, label: '', ready: false }, s: {}, settings: {} };
+    const g = (fn) => () => { if (this.game) fn(this.game); };
+    const s = ui.s || {}, st = ui.settings || {}, scr = ui.screen, ov = ui.overlay;
+    const fight = ui.fight;
+    const kindColor = fight ? ({ boss: '#ffc23d', elite: '#ff5a4f', secret: '#b57bff', dummy: '#d9a66b' }[fight.kind] || '#ffb22e') : '#ffb22e';
+    const toastBg = { good: '#163a22', warn: '#3a1020', badge: '#3a2a08', info: '#17143a' }, toastBd = { good: '#57d36a', warn: '#ff5a4f', badge: '#ffc23d', info: '#39335f' };
+    const hud = ui.hud || {};
+    const build = ui.build || null;
+    const title = ui.title || {};
+    const langList = (title.langs || (window.SQ ? SQ.LANGS.map(l => ({ id: l.id, label: l.label, active: l.id === ui.lang })) : [])).map(l => ({ ...l, bg: l.active ? '#ffb22e' : '#120f2e', fg: l.active ? '#1a1030' : '#f5ecd9', pick: g(G => G.setLang(l.id)) }));
+    const term = ui.term || { video: {} };
+    const stats = ui.stats || {};
+    const tgl = (label, key) => ({ label, state: st[key] ? s.on : s.off, bg: st[key] ? '#57d36a' : '#39335f', fg: st[key] ? '#0d0b24' : '#f5ecd9', flip: g(G => G.setSetting(key, !st[key])) });
+    const { vw } = this.state, narrow = vw < 760, live = scr === 'play' || scr === 'build';
+    return {
+      canvasRef: this.canvasRef, s, wCols: narrow ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))',
+      bottomOn: live, hudOn: scr === 'play', ctlOn: live, canFs: !!ui.canFs, fsLabel: ui.fs ? '⤡' : '⤢', toggleFs: g(G => G.toggleFullscreen()), muteTitle: st.music || st.sfx ? s.mute : s.unmute,
+      isBoot: scr === 'boot', isTitle: scr === 'title', isVictory: scr === 'victory',
+      chromeOp: scr === 'play' || scr === 'build' ? 1 : 0, hudOp: scr === 'play' ? 1 : 0,
+      boot: ui.boot, bootPctW: (ui.boot.pct || 0) + '%', bootPctLabel: (ui.boot.pct || 0) + '%', bootCursor: ui.boot.ready ? 'pointer' : 'default',
+      enter: g(G => G.enter()),
+      obj: ui.obj || { main: '', sub: '' },
+      bannerOn: !!ui.banner && scr === 'play' && !ov, banner: ui.banner || {},
+      toastList: (ui.toasts || []).map(t => ({ ...t, bg: toastBg[t.kind] || toastBg.info, border: toastBd[t.kind] || toastBd.info })),
+      fightOn: !!fight && ov !== 'pause', noFight: !fight || ov === 'pause', fightBorder: kindColor, fightMaxH: '58vh',
+      fight: fight ? { ...fight, pips: fight.pips.map(p => ({ bg: p.on ? '#ffc23d' : 'transparent' })), options: fight.options.map(o => ({ ...o, strike: o.off ? 'line-through' : 'none' })) } : { options: [], q: [], pips: [] },
+      weapons: ui.weapons || [],
+      actionOn: !!ui.action && scr === 'play', action: ui.action || {}, doAction: g(G => G.action()),
+      buildPanelOn: scr === 'build' && !!build && !build.failed, buildFailed: scr === 'build' && !!build && build.failed, build: build ? { ...build, steps: build.steps.map(x => ({ label: x.label, op: x.wait ? 0.45 : 1, dot: x.done ? '#57d36a' : x.active ? '#ffb22e' : '#39335f' })) } : { steps: [] },
+      buildPctW: (build ? build.pct : 0) + '%', buildStep: build ? ((build.steps.find(x => x.active) || build.steps[build.steps.length - 1]).label) : '', buildDot: build && build.pct >= 100 ? '#57d36a' : '#ffb22e', retryBuild: g(G => G.retryBuild()), backTitle: g(G => G.backToTitle()),
+      hud, healthColor: hud.healthLow ? '#ff5a4f' : '#57d36a', comboOp: hud.comboOn ? 1 : 0.25,
+      glideBg: st.glide ? '#ffb22e' : '#1a1640', glideFg: st.glide ? '#1a1030' : '#f5ecd9', muteLabel: st.music || st.sfx ? '♪' : '×',
+      openMap: g(G => G.toggleMap()), closeMap: g(G => { if (G.overlay === 'map') G.toggleMap(); }), stop: (e) => e.stopPropagation(),
+      toggleGlide: g(G => G.setSetting('glide', !st.glide)), toggleMute: g(G => G.toggleMute()), pause: g(G => G.togglePause()),
+      title, titleErr: !!title.error, aiOffNote: scr === 'title' && title.aiOk === false,
+      skill: this.state.skill, onSkill: (e) => this.setState({ skill: e.target.value }),
+      onSkillKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.game && this.game.startSkill(this.state.skill); } },
+      buildFort: g(G => G.startSkill(this.state.skill)),
+      skillChips: (title.skills || []).map(k => ({ label: k.label, pick: g(G => { this.setState({ skill: k.label }); G.startSkill(k.id); }) })),
+      langList,
+      cont: g(G => G.continueGame()), sample: g(G => G.playSample()), demo: g(G => G.demo14()),
+      ovTerm: ov === 'terminal', term, termReady: !!term.ready, blinkOp: this.state.blink ? 1 : 0,
+      termRetry: g(G => G.termRetry()), termBasic: g(G => G.termBasic()), closeTerm: g(G => G.closeTerminal()),
+      ovMap: ov === 'map', map: ui.map || { floors: [] },
+      ovStats: ov === 'stats', stats: { ...stats, lines: stats.lines || [], badges: stats.badges || [] }, rankColor: stats.done ? stats.rankColor : '#39335f', statsNext: g(G => G.statsContinue()),
+      ovFell: ov === 'fell', restart: g(G => G.restartRoom()),
+      ovSecret: ov === 'secretOffer' || ov === 'secretLoading', ovSecretOffer: ov === 'secretOffer', secretText: ov === 'secretLoading' ? s.loadingFort : s.crackSpot,
+      secretYes: g(G => G.secretAccept()), secretNo: g(G => G.secretDecline()),
+      ovPause: ov === 'pause', toggles: [tgl(s.music, 'music'), tgl(s.sfx, 'sfx'), tgl(s.glide, 'glide')],
+      ytKey: st.ytKey || '', onYt: (e) => this.game && this.game.setSetting('ytKey', e.target.value.trim()),
+      quit: g(G => G.quitToTitle()), erase: g(G => G.eraseSave()), eraseLabel: ui.confirmErase ? s.resetConfirm : s.resetSave, eraseBg: ui.confirmErase ? '#5a1a2e' : '#1a1640',
+      victory: ui.victory || { badges: [] }, newFort: g(G => G.newFortFromVictory())
+    };
+  }
+}
+</script>
+</body>
+</html>

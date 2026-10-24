@@ -1,0 +1,3 @@
+* text=auto
+# The game files are frozen: never convert their line endings
+public/** -text
