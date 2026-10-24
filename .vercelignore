@@ -1,0 +1,8 @@
+design/
+tests/
+test-results/
+playwright-report/
+.npm-cache/
+.env*
+!.env.example
+.phase-stage.mjs
