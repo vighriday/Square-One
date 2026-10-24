@@ -40,4 +40,29 @@
       document.addEventListener('visibilitychange', function () { if (document.hidden) send(true); });
     }
   } catch (e) {}
+  try {
+    var p = JSON.parse(window.localStorage.getItem(KP) || '{}');
+    p.settings = p.settings || {};
+    if (cfg.youtube && !p.settings.ytKey) { p.settings.ytKey = 'server'; window.localStorage.setItem(KP, JSON.stringify(p)); }
+    else if (!cfg.youtube && p.settings.ytKey === 'server') { p.settings.ytKey = ''; window.localStorage.setItem(KP, JSON.stringify(p)); }
+  } catch (e) {}
+  try {
+    if (cfg.youtube) {
+      var originalFetch = window.fetch;
+      window.fetch = function (input, init) {
+        try {
+          var raw = typeof input === 'string' ? input : input.url;
+          if (/^https:\/\/www\.googleapis\.com\/youtube\/v3\/(search|videos)\?/.test(raw)) {
+            var url = new URL(raw);
+            if (url.searchParams.get('key') === 'server') {
+              url.searchParams.delete('key');
+              var local = '/api/youtube/' + url.pathname.split('/').pop() + '?' + url.searchParams.toString();
+              input = typeof input === 'string' ? local : new Request(new URL(local, window.location.href).href, input);
+            }
+          }
+        } catch (e) {}
+        return originalFetch.call(window, input, init);
+      };
+    }
+  } catch (e) {}
 })();

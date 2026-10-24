@@ -25,3 +25,10 @@ Implementation root: `backend-arch-ref/` (the supplied specification and locked 
 - All 16 unit tests and frontend verification pass, including cache corruption, bad-key early stop, thought filtering, settings fallback and retry behavior.
 - Official Google model/thinking documentation confirms the specified model names and low thinking setting; real free-key availability and live latency remain deployment checks.
 
+## Phase 4 — YouTube
+
+- Added allowlisted search/video proxies, nine-second upstream timeout, rate limits and seven-day / one-day Neon cache lifetimes.
+- The bridge sets/clears the `server` placeholder and redirects only matching placeholder-key requests; user-supplied keys and unrelated fetches pass through.
+- `npm run verify:frontend` and all 19 tests pass. Verified parameter stripping, ID/query bounds, upstream JSON/status preservation and cache-on-200 only.
+- A real YouTube video and quota behavior require a server key, which is not present here.
+
