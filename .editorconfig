@@ -1,0 +1,12 @@
+root = true
+
+[*.{js,mjs,json,md,sql}]
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[public/{Square One.dc.html,support.js,sq-data.js,sq-engine.js,sq-game.js}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = false

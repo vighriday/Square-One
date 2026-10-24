@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build", "outputDirectory": "public", "regions": ["sin1"],
+  "functions": { "api/**/*.js": { "maxDuration": 90 } },
+  "rewrites": [
+    { "source": "/", "destination": "/api/page" },
+    { "source": "/play", "destination": "/api/page" },
+    { "source": "/stats", "destination": "/api/stats-page" },
+    { "source": "/%7B%7B:path*", "destination": "/api/junk" }
+  ],
+  "headers": [
+    { "source": "/vendor/(.*)", "headers": [{ "key": "cache-control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/(sq-data|sq-engine|sq-game|support|sq-bridge).js", "headers": [{ "key": "cache-control", "value": "public, max-age=600, stale-while-revalidate=86400" }] }
+  ]
+}
