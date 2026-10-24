@@ -8,3 +8,11 @@ playwright-report
 *.log
 .npm-cache/
 .DS_Store
+
+# Local planning and handoff material
+/AGENTS.md
+/CODEX_PROMPT.md
+/START_HERE.md
+/PROGRESS.md
+/REPORT.md
+/design/

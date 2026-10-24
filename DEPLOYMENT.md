@@ -1,5 +1,7 @@
 # Vercel deployment
 
+**Live game:** [Square One](https://squareone-eight.vercel.app/) | [Health](https://squareone-eight.vercel.app/api/health) | [Stats](https://squareone-eight.vercel.app/stats)
+
 Start with the account-free mock demo. It plays the complete game using generated practice content, needs no database or API keys, and keeps player progress in that browser. Add live services after the demo is running.
 
 ## Deployment schema
@@ -34,12 +36,12 @@ flowchart TD
 | `/api/stats`, `/stats` | stats handlers | Zero aggregates until a database is configured |
 | `/%7B%7B...` | `api/junk.js` rewrite | 204 for the raw template iframe |
 
-`vercel.json` is the executable deployment configuration. Static assets use `public/`; generated HTML is imported into the page function so runtime filesystem access is unnecessary. `design/` and tests are excluded from the Vercel upload.
+`vercel.json` is the executable deployment configuration. Static assets use `public/`; generated HTML is imported into the page function so runtime filesystem access is unnecessary. Tests and local development notes are excluded from the Vercel upload.
 
 ## Launch a working demo
 
 1. Sign in to [Vercel](https://vercel.com/new) with GitHub on the **Hobby** plan.
-2. Import **vighriday/Square-One**. Select **Other** as the framework. The GitHub repository root is the project root; do not enter `backend-arch-ref` here (that is only this workspace's containing folder).
+2. Import **vighriday/Square-One**. Select **Other** as the framework. Use the GitHub repository root as the project root.
 3. Set Node.js to **22.x**. Use install command `npm ci`, build command `npm run build`, output directory `public`. `vercel.json` sets function region **sin1** and maximum duration **90 seconds**.
 4. Add `AI_MODE=mock` to **Preview and Production** environments. Optionally add a random `IP_SALT` generated with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Leave DATABASE_URL, GEMINI_API_KEY and YOUTUBE_API_KEY unset for this demo.
 5. Click **Deploy**. Open `/api/health`, then `/`. Enter the game, choose **Excel**, fire the three correct warm-up answers, open a terminal, fight a monster and continue. A perfect warm-up intentionally starts at room 6.
@@ -47,7 +49,7 @@ flowchart TD
 
 Expected health: `ok:true`, `db:"off"`, `ai.mode:"mock"`, `youtube:false`, `sync:false`, `frontendLocked:true`. Missing IP_SALT causes a warning, not a broken demo. Mock content is deliberately generic and must be presented as a mock, rather than live subject tutoring.
 
-If the Vercel connection is available in Codex, the same project/settings can be deployed through it. This checkout did not contain Vercel login credentials; until the account is connected/imported, there is no claimed live deployment URL.
+The public deployment is https://squareone-eight.vercel.app/. Its enabled services depend on the deployment environment; use `/api/health` to inspect the current configuration.
 
 ## Add Neon, Gemini and YouTube
 

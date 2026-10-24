@@ -6,3 +6,11 @@ playwright-report/
 .env*
 !.env.example
 .phase-stage.mjs
+
+# Local planning and handoff material
+/AGENTS.md
+/CODEX_PROMPT.md
+/START_HERE.md
+/PROGRESS.md
+/REPORT.md
+/design/

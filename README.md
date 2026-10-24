@@ -1,11 +1,9 @@
-<!-- Two placeholders to replace before you publish: YOUR-APP (your Vercel address) and YOUR-ORG (your GitHub account). -->
-
 <p align="center">
-  <a href="https://YOUR-APP.vercel.app"><img src="docs/media/hero.png" alt="Square One: everyone starts at square one, nobody stays there" width="100%"></a>
+  <a href="https://squareone-eight.vercel.app/"><img src="docs/media/hero.png" alt="Square One: everyone starts at square one, nobody stays there" width="100%"></a>
 </p>
 
 <p align="center">
-  <a href="https://YOUR-APP.vercel.app"><img src="https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ffb22e?style=for-the-badge&labelColor=07061a" alt="Play now"></a>
+  <a href="https://squareone-eight.vercel.app/"><img src="https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ffb22e?style=for-the-badge&labelColor=07061a" alt="Play now"></a>
   <a href="#-run-it-locally"><img src="https://img.shields.io/badge/RUN%20LOCALLY-2%20commands-57d36a?style=for-the-badge&labelColor=07061a" alt="Run locally"></a>
   <a href="#-architecture"><img src="https://img.shields.io/badge/ARCHITECTURE-how%20it%20works-4fa3ff?style=for-the-badge&labelColor=07061a" alt="Architecture"></a>
 </p>
@@ -372,8 +370,8 @@ flowchart LR
 > **Needs:** Node.js 22 and npm. No accounts needed for the first run.
 
 ```bash
-git clone https://github.com/YOUR-ORG/square-one.git
-cd square-one
+git clone https://github.com/vighriday/Square-One.git
+cd Square-One
 npm install
 AI_MODE=mock npm run dev        # http://localhost:3000, made-up AI content, no keys
 ```
@@ -401,6 +399,8 @@ With **no settings at all** the game still runs and the offline Python fort work
 ---
 
 ## ☁ Deploy
+
+**Live game:** [squareone-eight.vercel.app](https://squareone-eight.vercel.app/). See [DEPLOYMENT.md](DEPLOYMENT.md) for the deployment schema and exact configuration.
 
 1. **Neon:** create a free project in **AWS Asia Pacific (Singapore)**, copy the pooled connection string.
 2. **Vercel:** import the repo. Region is set to `sin1` in `vercel.json`. Add the settings above.
@@ -445,7 +445,6 @@ square-one/
 ├── tests/                  # unit and end-to-end tests
 ├── docs/media/             # images in this README
 ├── frontend.lock.json      # SHA-256 fingerprints of the 🔒 files
-├── AGENTS.md               # full backend spec
 └── FINDINGS.md             # frontend issues found, reported but not changed
 ```
 
@@ -471,7 +470,7 @@ Frontend issues are **reported, not patched**, because the game files are locked
 
 ## 🙏 Credits
 
-- Built in **Claude Design**; backend built with **Codex** from [`AGENTS.md`](AGENTS.md).
+- Built in **Claude Design**; backend built with **Codex**.
 - Fonts: [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P), [Atkinson Hyperlegible](https://fonts.google.com/specimen/Atkinson+Hyperlegible), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) and [Noto Sans Devanagari](https://fonts.google.com/noto/specimen/Noto+Sans+Devanagari), all under the SIL Open Font License.
 - Powered by [Vercel](https://vercel.com), [Neon](https://neon.com), [Google Gemini](https://ai.google.dev) and the [YouTube Data API](https://developers.google.com/youtube/v3).
 - Inspired by the first-person classics of the early 90s. Every texture, sprite and sound here is drawn in code.
