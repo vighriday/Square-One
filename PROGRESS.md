@@ -32,3 +32,9 @@ Implementation root: `backend-arch-ref/` (the supplied specification and locked 
 - `npm run verify:frontend` and all 19 tests pass. Verified parameter stripping, ID/query bounds, upstream JSON/status preservation and cache-on-200 only.
 - A real YouTube video and quota behavior require a server key, which is not present here.
 
+## Phase 5 — stats
+
+- Added aggregate SQL, numeric JSON output and a self-contained responsive stats page with a ten-second refresh; both routes respect STATS_PUBLIC=false.
+- Sample forts are excluded from fort/skill counts, skills are case-insensitive, live latency excludes mock/cache replies, and HTML output is escaped.
+- `npm run verify:frontend` and all 20 unit tests pass; cache expiry and no-database zero counts are checked.
+- User authorized incremental GitHub commits/pushes without coauthors. The specified remote was empty; preserving the supplied frozen baseline before backend commits.
