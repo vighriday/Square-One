@@ -100,3 +100,5 @@ from saves order by updated_at desc limit 10;
 ## Roll back
 
 Use Vercel's deployment history to promote the last working deployment. For a reliable account-free fallback, set AI_MODE=mock, unset DATABASE_URL and YOUTUBE_API_KEY, and redeploy. The sample Python fort also works with no environment variables.
+
+Implementation references: [Vercel Node Web handlers](https://vercel.com/docs/functions/runtimes/node-js), [Gemini thinking settings](https://ai.google.dev/gemini-api/docs/thinking), and [Gemini free/paid API tiers](https://ai.google.dev/gemini-api/docs/pricing). Use the free API tier; this code never upgrades the account.

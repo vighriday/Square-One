@@ -49,6 +49,7 @@ Implementation root: `backend-arch-ref/` (the supplied specification and locked 
 ## Phase 7 — handoff
 
 - Added .env.example and DEPLOYMENT.md with the Vercel schema, account-free mock launch, Neon/Gemini/YouTube setup, preview checks and demo-day checklist.
-- User explicitly took ownership of README; no README was created. DEPLOYMENT.md holds the operational handoff.
+- User supplied readme-pack after taking ownership of README. Copied README.md and all docs/media byte-for-byte; verified every copied SHA-256. Original YOUR-APP / YOUR-ORG placeholders remain for the author. DEPLOYMENT.md holds exact operational steps.
 - Frozen baseline and phases 1–5 were individually committed and pushed to main without coauthor trailers. Hunt fixes and deployment handoff follow as separate commits.
 - Vercel CLI/login/env credentials are absent. A Vercel integration was found but is not connected; it was offered for connection. No live deployment or account-dependent acceptance test is claimed.
+- Final expanded `npm run e2e` passed: actual Settings erase buttons, both complete game runs, and backup with localStorage access throwing SecurityError. No browser page errors and zero unpkg requests. Added REPORT.md with the full done checklist, one-line file inventory and limitations.
