@@ -18,3 +18,10 @@ Implementation root: `backend-arch-ref/` (the supplied specification and locked 
 - `npm run verify:frontend` and all 9 unit tests pass. Transaction order, erase parsing and window boundaries checked locally.
 - No DATABASE_URL or connected Neon account is available; migration and real-branch integration remain unverified, not simulated as a successful live test.
 
+## Phase 3 — Gemini
+
+- Added REST model/setting fallbacks, a shared request deadline across retries, JSON extraction/repair, exact validation, extras quality retry and canonical refusals.
+- Valid live responses and refusals use 30-day / 1-day Neon cache lifetimes. Mock and live+mock fallback content never enter the cache. Duplicate in-flight prompts share work.
+- All 16 unit tests and frontend verification pass, including cache corruption, bad-key early stop, thought filtering, settings fallback and retry behavior.
+- Official Google model/thinking documentation confirms the specified model names and low thinking setting; real free-key availability and live latency remain deployment checks.
+
